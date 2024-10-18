@@ -2,24 +2,25 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: willbrid
-  name: zerofiltretech-provisioner-willbrid
+  namespace: <your_namespace>
+  name: zerofiltretech-provisioner-<your_namespace>
 data:
-  OTEL_SERVICE_NAME: "zerofiltretech-provisioner-willbrid"
-  OTEL_PYTHON_LOG_CORRELATION: "true"
-  OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "true"
+  # Define otel env variables here
+  # OTEL_SERVICE_NAME: "zerofiltretech-provisioner-<your_namespace>"
+  # OTEL_PYTHON_LOG_CORRELATION: "..."
+  # OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "..."
   OTEL_PYHTON_LOG_LEVEL: "info"
-  OTEL_LOGS_EXPORTER: "otlp"
-  OTEL_TRACES_EXPORTER: "otlp"
-  OTEL_METRICS_EXPORTER: "otlp"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otelcol-opentelemetry-collector.zerofiltre-bootcamp.svc:4318"
+  # OTEL_LOGS_EXPORTER: "..."
+  # OTEL_TRACES_EXPORTER: "..."
+  # OTEL_METRICS_EXPORTER: "..."
+  # OTEL_EXPORTER_OTLP_ENDPOINT: "http://..."
   OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: willbrid
-  name: zerofiltretech-provisioner-willbrid
+  namespace: <your_namespace>
+  name: zerofiltretech-provisioner-<your_namespace>
 type: Opaque
 data:
   VERIFICATION_TOKEN: bWF2YWxldXI=
@@ -34,23 +35,23 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: willbrid
-  name: zerofiltretech-provisioner-willbrid
+  namespace: <your_namespace>
+  name: zerofiltretech-provisioner-<your_namespace>
 spec:
   minReadySeconds: 30
   progressDeadlineSeconds: 120
   replicas: 1
   selector:
     matchLabels:
-      app: zerofiltretech-provisioner-willbrid
+      app: zerofiltretech-provisioner-<your_namespace>
   template:
     metadata:
       labels:
-        app: zerofiltretech-provisioner-willbrid
+        app: zerofiltretech-provisioner-<your_namespace>
     spec:
       containers:
-        - name: zerofiltretech-provisioner-willbrid
-          image: imzerofiltre/zerofiltretech-provisioner:7_willbrid
+        - name: zerofiltretech-provisioner-<your_namespace>
+          image: imzerofiltre/zerofiltretech-provisioner:7_<your_namespace>
           imagePullPolicy: IfNotPresent
           ports:
           - name: http-port
@@ -58,16 +59,16 @@ spec:
             protocol: TCP
           envFrom:
           - configMapRef:
-              name: zerofiltretech-provisioner-willbrid
+              name: zerofiltretech-provisioner-<your_namespace>
           - secretRef:
-              name: zerofiltretech-provisioner-willbrid
+              name: zerofiltretech-provisioner-<your_namespace>
           resources:
             requests:
               cpu: 0.1
               memory: '50Mi'
             limits:
               cpu: 0.5
-              memory: 512Mi
+              memory: 256Mi
           livenessProbe:
             tcpSocket:
               port: 5000
@@ -77,37 +78,37 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: willbrid
-  name: zerofiltretech-provisioner-willbrid
+  namespace: <your_namespace>
+  name: zerofiltretech-provisioner-<your_namespace>
 spec:
   ports:
   - protocol: TCP
     port: 5000
     targetPort: 5000
   selector:
-    app: zerofiltretech-provisioner-willbrid
+    app: zerofiltretech-provisioner-<your_namespace>
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: willbrid
-  name: zerofiltretech-provisioner-willbrid
+  namespace: <your_namespace>
+  name: zerofiltretech-provisioner-<your_namespace>
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: willbrid-provisioner.zerofiltre.tech
+    - host: <your_namespace>-provisioner.zerofiltre.tech
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: zerofiltretech-provisioner-willbrid
+                name: zerofiltretech-provisioner-<your_namespace>
                 port:
                   number: 5000
   tls: 
   - hosts:
-    - willbrid-provisioner.zerofiltre.tech
-    secretName: zerofiltretech-provisioner-willbrid-cert
+    - <your_namespace>-provisioner.zerofiltre.tech
+    secretName: zerofiltretech-provisioner-<your_namespace>-cert
