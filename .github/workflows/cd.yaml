@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_TAG_SUFFIX: willbrid
+      DOCKER_TAG_SUFFIX: <your_namespace>
 
     steps:
     - name: Checkout
