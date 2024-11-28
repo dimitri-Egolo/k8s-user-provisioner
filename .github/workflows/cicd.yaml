@@ -3,7 +3,7 @@ name: Python CI/CD Pipeline with k8s
 on:
   pull_request:
     branches: 
-      - main
+      - otlp
 
 jobs:
   build:
