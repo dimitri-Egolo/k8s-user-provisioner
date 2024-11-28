@@ -2,25 +2,26 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: <your_namespace>
-  name: zerofiltretech-provisioner-<your_namespace>
+  namespace: nedimitri
+  name: zerofiltretech-provisioner-nedimitri
 data:
   # Define otel env variables here
-  # OTEL_SERVICE_NAME: "zerofiltretech-provisioner-<your_namespace>"
-  # OTEL_PYTHON_LOG_CORRELATION: "..."
-  # OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "..."
+  OTEL_SERVICE_NAME: "zerofiltretech-provisioner-nedimitri"
+  OTEL_PYTHON_LOG_CORRELATION: "true"
+  OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "true"
   OTEL_PYHTON_LOG_LEVEL: "info"
-  # OTEL_LOGS_EXPORTER: "..."
-  # OTEL_TRACES_EXPORTER: "..."
-  # OTEL_METRICS_EXPORTER: "..."
-  # OTEL_EXPORTER_OTLP_ENDPOINT: "http://..."
-  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_LOGS_EXPORTER: "otlp"
+  OTEL_TRACES_EXPORTER: "otlp"
+  OTEL_METRICS_EXPORTER: "otlp"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otelcol-opentelemetry-collector.zerofiltre-bootcamp.svc.cluster.local:4317"
+
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  namespace: <your_namespace>
-  name: zerofiltretech-provisioner-<your_namespace>
+  namespace: nedimitri
+  name: zerofiltretech-provisioner-nedimitri
 type: Opaque
 data:
   VERIFICATION_TOKEN: bWF2YWxldXI=
@@ -35,33 +36,33 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: <your_namespace>
-  name: zerofiltretech-provisioner-<your_namespace>
+  namespace: nedimitri
+  name: zerofiltretech-provisioner-nedimitri
 spec:
   minReadySeconds: 30
   progressDeadlineSeconds: 120
   replicas: 1
   selector:
     matchLabels:
-      app: zerofiltretech-provisioner-<your_namespace>
+      app: zerofiltretech-provisioner-nedimitri
   template:
     metadata:
       labels:
-        app: zerofiltretech-provisioner-<your_namespace>
+        app: zerofiltretech-provisioner-nedimitri
     spec:
       containers:
-        - name: zerofiltretech-provisioner-<your_namespace>
-          image: imzerofiltre/zerofiltretech-provisioner:7_<your_namespace>
-          imagePullPolicy: IfNotPresent
+        - name: zerofiltretech-provisioner-nedimitri
+          image: nedimitri/zerofiltretech-provisioner:1_latest
+          imagePullPolicy: Always
           ports:
           - name: http-port
             containerPort: 5000
             protocol: TCP
           envFrom:
           - configMapRef:
-              name: zerofiltretech-provisioner-<your_namespace>
+              name: zerofiltretech-provisioner-nedimitri
           - secretRef:
-              name: zerofiltretech-provisioner-<your_namespace>
+              name: zerofiltretech-provisioner-nedimitri
           resources:
             requests:
               cpu: 0.1
@@ -78,37 +79,37 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: <your_namespace>
-  name: zerofiltretech-provisioner-<your_namespace>
+  namespace: nedimitri
+  name: zerofiltretech-provisioner-nedimitri
 spec:
   ports:
   - protocol: TCP
     port: 5000
     targetPort: 5000
   selector:
-    app: zerofiltretech-provisioner-<your_namespace>
+    app: zerofiltretech-provisioner-nedimitri
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: <your_namespace>
-  name: zerofiltretech-provisioner-<your_namespace>
+  namespace: nedimitri
+  name: zerofiltretech-provisioner-nedimitri
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: <your_namespace>-provisioner.zerofiltre.tech
+    - host: nedimitri-provisioner.zerofiltre.tech
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: zerofiltretech-provisioner-<your_namespace>
+                name: zerofiltretech-provisioner-nedimitri
                 port:
                   number: 5000
   tls: 
   - hosts:
-    - <your_namespace>-provisioner.zerofiltre.tech
-    secretName: zerofiltretech-provisioner-<your_namespace>-cert
+    - nedimitri-provisioner.zerofiltre.tech
+    secretName: zerofiltretech-provisioner-nedimitri-cert
